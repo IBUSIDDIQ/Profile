@@ -90,88 +90,79 @@
           </p>
 
           <form
-            id="recruiterForm"
-            name="recruiter-enquiry"
-            method="POST"
-            data-netlify="true"
-            netlify-honeypot="bot-field"
-          >
+           id="recruiterForm"
+           name="recruiter-enquiry"
+           method="POST"
+           action="https://formsubmit.co/siddiq.ibu11@gmail.com"
+>
+  <input type="hidden" name="_subject"
+    value="New Recruiter Enquiry - Ibrahim Siddiq Portfolio">
 
-            <input type="hidden" name="form-name" value="recruiter-enquiry">
+  <div class="form-group">
+    <label for="visitorName">Full Name *</label>
+    <input
+      type="text"
+      id="visitorName"
+      name="name"
+      placeholder="Enter your full name"
+      autocomplete="name"
+      required
+    >
+  </div>
 
-            <p hidden>
-              <label>
-                Don't fill this out:
-                <input name="bot-field" />
-              </label>
-            </p>
+  <div class="form-group">
+    <label for="visitorEmail">Email Address *</label>
+    <input
+      type="email"
+      id="visitorEmail"
+      name="email"
+      placeholder="Enter your email"
+      autocomplete="email"
+      required
+    >
+  </div>
 
-            <div class="form-group">
-              <label for="visitorName">Full Name *</label>
-              <input
-                type="text"
-                id="visitorName"
-                name="name"
-                placeholder="Enter your full name"
-                autocomplete="name"
-                required
-              >
-            </div>
+  <div class="form-group">
+    <label for="visitorPhone">Phone Number *</label>
+    <input
+      type="tel"
+      id="visitorPhone"
+      name="phone"
+      placeholder="Enter your phone number"
+      autocomplete="tel"
+      required
+    >
+  </div>
 
-            <div class="form-group">
-              <label for="visitorEmail">Email Address *</label>
-              <input
-                type="email"
-                id="visitorEmail"
-                name="email"
-                placeholder="Enter your email"
-                autocomplete="email"
-                required
-              >
-            </div>
+  <div class="form-group">
+    <label for="visitorCompany">Company Name</label>
+    <input
+      type="text"
+      id="visitorCompany"
+      name="company"
+      placeholder="Your company name"
+      autocomplete="organization"
+    >
+  </div>
 
-            <div class="form-group">
-              <label for="visitorPhone">Phone Number *</label>
-              <input
-                type="tel"
-                id="visitorPhone"
-                name="phone"
-                placeholder="Enter your phone number"
-                autocomplete="tel"
-                required
-              >
-            </div>
+  <div class="form-group">
+    <label for="visitorMessage">Message</label>
+    <textarea
+      id="visitorMessage"
+      name="message"
+      rows="3"
+      placeholder="Write your message..."
+    ></textarea>
+  </div>
 
-            <div class="form-group">
-              <label for="visitorCompany">Company Name</label>
-              <input
-                type="text"
-                id="visitorCompany"
-                name="company"
-                placeholder="Your company name"
-                autocomplete="organization"
-              >
-            </div>
+  <button class="visitor-submit" id="visitorSubmit" type="submit">
+    Send Enquiry <span>↗</span>
+  </button>
 
-            <div class="form-group">
-              <label for="visitorMessage">Message</label>
-              <textarea
-                id="visitorMessage"
-                name="message"
-                rows="3"
-                placeholder="Write your message..."
-              ></textarea>
-            </div>
-
-            <button class="visitor-submit" id="visitorSubmit" type="submit">
-              Send Enquiry <span>↗</span>
-            </button>
-
-            <button class="visitor-back" id="backToChoices" type="button">
-              ← Back
-            </button>
-
-          </form>
+  <button class="visitor-back" id="backToChoices" type="button">
+    ← Back
+  </button>
+</form>
 
           <div class="visitor-error" id="visitorError" role="alert" hidden>
             Something went wrong. Please try again.

@@ -49,9 +49,7 @@ document.addEventListener("DOMContentLoaded", () => {
     sessionStorage.setItem(SESSION_KEY, "yes");
 
     overlay.classList.add("is-hidden");
-
     document.body.classList.remove("modal-open");
-
     overlay.hidden = true;
 
   }
@@ -107,10 +105,10 @@ document.addEventListener("DOMContentLoaded", () => {
 
     recruiterBtn.addEventListener("click", () => {
 
-      choices.hidden = true;
-      recruiterPanel.hidden = false;
-      successPanel.hidden = true;
-      errorPanel.hidden = true;
+      if (choices) choices.hidden = true;
+      if (recruiterPanel) recruiterPanel.hidden = false;
+      if (successPanel) successPanel.hidden = true;
+      if (errorPanel) errorPanel.hidden = true;
 
       const nameInput = document.getElementById("visitorName");
 
@@ -131,9 +129,9 @@ document.addEventListener("DOMContentLoaded", () => {
 
     backBtn.addEventListener("click", () => {
 
-      recruiterPanel.hidden = true;
-      choices.hidden = false;
-      errorPanel.hidden = true;
+      if (recruiterPanel) recruiterPanel.hidden = true;
+      if (choices) choices.hidden = false;
+      if (errorPanel) errorPanel.hidden = true;
 
     });
 
@@ -144,15 +142,29 @@ document.addEventListener("DOMContentLoaded", () => {
      8. ESCAPE KEY SUPPORT
   ===================================== */
 
+  const certLightbox = document.getElementById("certLightbox");
+
+  function closeLightbox() {
+
+    if (!certLightbox) return;
+
+    certLightbox.hidden = true;
+    document.body.classList.remove("modal-open");
+
+  }
+
   document.addEventListener("keydown", (event) => {
 
     if (event.key === "Escape") {
+
       if (overlay && !overlay.hidden) {
         enterPortfolio();
       }
+
       if (certLightbox && !certLightbox.hidden) {
         closeLightbox();
       }
+
     }
 
   });
@@ -160,6 +172,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
   /* =====================================
      9. RECRUITER FORM SUBMISSION
+     FORMSUBMIT EMAIL INTEGRATION
   ===================================== */
 
   if (form) {
@@ -168,48 +181,76 @@ document.addEventListener("DOMContentLoaded", () => {
 
       event.preventDefault();
 
+      if (!submitBtn || !errorPanel) return;
+
       errorPanel.hidden = true;
+      errorPanel.textContent = "";
 
       submitBtn.disabled = true;
       submitBtn.textContent = "Sending enquiry...";
 
       try {
 
+        // Collect all form fields
         const formData = new FormData(form);
 
-        const encodedData = new URLSearchParams();
+        const formValues = Object.fromEntries(
+          formData.entries()
+        );
 
-        for (const [key, value] of formData.entries()) {
-          encodedData.append(key, value);
+        // Send JSON to FormSubmit AJAX endpoint
+        const response = await fetch(
+          "https://formsubmit.co/ajax/siddiq.ibu11@gmail.com",
+          {
+            method: "POST",
+
+            headers: {
+              "Content-Type": "application/json",
+              "Accept": "application/json"
+            },
+
+            body: JSON.stringify(formValues)
+          }
+        );
+
+        // Read FormSubmit response
+        const result = await response.json();
+
+        console.log("FormSubmit response:", result);
+
+        // FormSubmit can return HTTP 200 even when submission fails.
+        if (
+          !response.ok ||
+          String(result.success).toLowerCase() !== "true"
+        ) {
+
+          throw new Error(
+            result.message || "Unable to send your enquiry."
+          );
+
         }
 
-        const response = await fetch("/", {
-
-          method: "POST",
-
-          headers: {
-            "Content-Type": "application/x-www-form-urlencoded"
-          },
-
-          body: encodedData.toString()
-
-        });
-
-        if (!response.ok) {
-          throw new Error("Unable to submit form");
-        }
+        // Successful submission
+        form.reset();
 
         recruiterPanel.hidden = true;
         successPanel.hidden = false;
 
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = 'Send Enquiry <span>↗</span>';
+
       } catch (error) {
 
-        console.error("Form submission error:", error);
+        console.error("Recruiter form error:", error);
+
+        // Show the actual error instead of a generic message
+        errorPanel.textContent =
+          error.message || "Something went wrong. Please try again.";
 
         errorPanel.hidden = false;
 
         submitBtn.disabled = false;
-        submitBtn.textContent = "Send Enquiry ↗";
+        submitBtn.innerHTML = 'Send Enquiry <span>↗</span>';
 
       }
 
@@ -219,28 +260,49 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
   /* =====================================
-     10. PROJECT FILTER TABS (HCLTech · Vestas / Dukane)
+     10. PROJECT FILTER TABS
   ===================================== */
 
-  const filterButtons = document.querySelectorAll("#projectFilters .filter-pill");
-  const companyGroups = document.querySelectorAll(".company-group[data-group]");
+  const filterButtons = document.querySelectorAll(
+    "#projectFilters .filter-pill"
+  );
+
+  const companyGroups = document.querySelectorAll(
+    ".company-group[data-group]"
+  );
 
   filterButtons.forEach((btn) => {
+
     btn.addEventListener("click", () => {
+
       const selected = btn.dataset.filter;
 
       filterButtons.forEach((pill) => {
+
         const isActive = pill === btn;
+
         pill.classList.toggle("active", isActive);
-        pill.setAttribute("aria-pressed", isActive ? "true" : "false");
+
+        pill.setAttribute(
+          "aria-pressed",
+          isActive ? "true" : "false"
+        );
+
       });
 
       companyGroups.forEach((group) => {
-        const matches = selected === "all" || group.dataset.group === selected;
+
+        const matches =
+          selected === "all" ||
+          group.dataset.group === selected;
+
         group.classList.toggle("is-hidden", !matches);
         group.hidden = !matches;
+
       });
+
     });
+
   });
 
 
@@ -248,25 +310,30 @@ document.addEventListener("DOMContentLoaded", () => {
      11. CERTIFICATE IMAGE LIGHTBOX
   ===================================== */
 
-  const certLightbox = document.getElementById("certLightbox");
   const certLightboxImg = document.getElementById("certLightboxImg");
-  const certLightboxClose = document.getElementById("certLightboxClose");
-  const certImages = document.querySelectorAll(".cert-image-wrap img");
 
-  function closeLightbox() {
-    if (!certLightbox) return;
-    certLightbox.hidden = true;
-    document.body.classList.remove("modal-open");
-  }
+  const certLightboxClose = document.getElementById(
+    "certLightboxClose"
+  );
+
+  const certImages = document.querySelectorAll(
+    ".cert-image-wrap img"
+  );
 
   certImages.forEach((img) => {
+
     img.addEventListener("click", () => {
+
       if (!certLightbox || !certLightboxImg) return;
+
       certLightboxImg.src = img.src;
       certLightboxImg.alt = img.alt;
+
       certLightbox.hidden = false;
       document.body.classList.add("modal-open");
+
     });
+
   });
 
   if (certLightboxClose) {
@@ -274,11 +341,15 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   if (certLightbox) {
+
     certLightbox.addEventListener("click", (event) => {
+
       if (event.target === certLightbox) {
         closeLightbox();
       }
+
     });
+
   }
 
 
@@ -288,15 +359,24 @@ document.addEventListener("DOMContentLoaded", () => {
 
   const tabLinks = document.querySelectorAll("[data-tab]");
   const panels = document.querySelectorAll("[data-panel]");
-  const VALID_TABS = Array.from(panels).map((p) => p.dataset.panel);
+
+  const VALID_TABS = Array.from(panels).map(
+    (panel) => panel.dataset.panel
+  );
+
   const DEFAULT_TAB = "about";
 
+
   function animateStats() {
-    const statNumbers = document.querySelectorAll(".stat-number[data-count]");
+
+    const statNumbers = document.querySelectorAll(
+      ".stat-number[data-count]"
+    );
 
     statNumbers.forEach((el) => {
 
       if (el.dataset.animated === "true") return;
+
       el.dataset.animated = "true";
 
       const target = parseInt(el.dataset.count, 10) || 0;
@@ -305,23 +385,37 @@ document.addEventListener("DOMContentLoaded", () => {
       const start = performance.now();
 
       function tick(now) {
-        const progress = Math.min((now - start) / duration, 1);
+
+        const progress = Math.min(
+          (now - start) / duration,
+          1
+        );
+
         const eased = 1 - Math.pow(1 - progress, 3);
         const value = Math.round(eased * target);
 
-        el.textContent = String(value).padStart(2, "0") + suffix;
+        el.textContent =
+          String(value).padStart(2, "0") + suffix;
 
         if (progress < 1) {
+
           requestAnimationFrame(tick);
+
         } else {
-          el.textContent = String(target).padStart(2, "0") + suffix;
+
+          el.textContent =
+            String(target).padStart(2, "0") + suffix;
+
         }
+
       }
 
       requestAnimationFrame(tick);
 
     });
+
   }
+
 
   function playRoadmapAnimation() {
 
@@ -332,7 +426,10 @@ document.addEventListener("DOMContentLoaded", () => {
 
     const nodes = roadmap.querySelectorAll(".roadmap-node");
 
-    nodes.forEach((node) => node.classList.remove("in-view"));
+    nodes.forEach((node) => {
+      node.classList.remove("in-view");
+    });
+
     progress.style.transform = "scaleY(0)";
 
     void roadmap.offsetWidth;
@@ -342,34 +439,59 @@ document.addEventListener("DOMContentLoaded", () => {
     });
 
     nodes.forEach((node, index) => {
+
       setTimeout(() => {
         node.classList.add("in-view");
       }, 220 + index * 260);
+
     });
 
   }
 
+
   function activateTab(name, updateHash) {
 
-    const target = VALID_TABS.includes(name) ? name : DEFAULT_TAB;
+    const target = VALID_TABS.includes(name)
+      ? name
+      : DEFAULT_TAB;
 
     panels.forEach((panel) => {
+
       panel.hidden = panel.dataset.panel !== target;
+
     });
 
     tabLinks.forEach((link) => {
+
       const isMatch = link.dataset.tab === target;
+
       link.classList.toggle("active", isMatch);
+
       if (link.hasAttribute("role")) {
-        link.setAttribute("aria-selected", isMatch ? "true" : "false");
+
+        link.setAttribute(
+          "aria-selected",
+          isMatch ? "true" : "false"
+        );
+
       }
+
     });
 
     if (updateHash !== false) {
-      history.replaceState(null, "", "#" + target);
+
+      history.replaceState(
+        null,
+        "",
+        "#" + target
+      );
+
     }
 
-    window.scrollTo({ top: 0, behavior: "smooth" });
+    window.scrollTo({
+      top: 0,
+      behavior: "smooth"
+    });
 
     if (target === "experience") {
       playRoadmapAnimation();
@@ -381,24 +503,39 @@ document.addEventListener("DOMContentLoaded", () => {
 
   }
 
+
   tabLinks.forEach((link) => {
 
     link.addEventListener("click", (event) => {
+
       event.preventDefault();
+
       activateTab(link.dataset.tab);
+
     });
 
   });
 
+
   window.addEventListener("hashchange", () => {
+
     const name = location.hash.replace("#", "");
+
     activateTab(name, false);
+
   });
 
-  const initialTab = location.hash ? location.hash.replace("#", "") : DEFAULT_TAB;
+
+  const initialTab = location.hash
+    ? location.hash.replace("#", "")
+    : DEFAULT_TAB;
+
   activateTab(initialTab, false);
 
-  if (initialTab === DEFAULT_TAB || !VALID_TABS.includes(initialTab)) {
+  if (
+    initialTab === DEFAULT_TAB ||
+    !VALID_TABS.includes(initialTab)
+  ) {
     animateStats();
   }
 
