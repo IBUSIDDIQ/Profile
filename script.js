@@ -25,7 +25,6 @@ document.addEventListener("DOMContentLoaded", () => {
   const recruiterPanel = document.getElementById("recruiterPanel");
   const successPanel = document.getElementById("visitorSuccess");
   const errorPanel = document.getElementById("visitorError");
-  const form = document.getElementById("recruiterForm");
 
   const exploreBtn = document.getElementById("exploreBtn");
   const skipBtn = document.getElementById("skipBtn");
@@ -33,7 +32,6 @@ document.addEventListener("DOMContentLoaded", () => {
   const closeBtn = document.getElementById("visitorClose");
   const backBtn = document.getElementById("backToChoices");
   const successBtn = document.getElementById("enterAfterSubmit");
-  const submitBtn = document.getElementById("visitorSubmit");
 
   const SESSION_KEY = "ibrahimPortfolioEntered";
 
@@ -99,6 +97,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
   /* =====================================
      6. RECRUITER BUTTON
+     GOOGLE FORMS INTEGRATION
   ===================================== */
 
   if (recruiterBtn) {
@@ -106,15 +105,12 @@ document.addEventListener("DOMContentLoaded", () => {
     recruiterBtn.addEventListener("click", () => {
 
       if (choices) choices.hidden = true;
+
       if (recruiterPanel) recruiterPanel.hidden = false;
+
       if (successPanel) successPanel.hidden = true;
+
       if (errorPanel) errorPanel.hidden = true;
-
-      const nameInput = document.getElementById("visitorName");
-
-      if (nameInput) {
-        nameInput.focus();
-      }
 
     });
 
@@ -130,7 +126,9 @@ document.addEventListener("DOMContentLoaded", () => {
     backBtn.addEventListener("click", () => {
 
       if (recruiterPanel) recruiterPanel.hidden = true;
+
       if (choices) choices.hidden = false;
+
       if (errorPanel) errorPanel.hidden = true;
 
     });
@@ -149,9 +147,11 @@ document.addEventListener("DOMContentLoaded", () => {
     if (!certLightbox) return;
 
     certLightbox.hidden = true;
+
     document.body.classList.remove("modal-open");
 
   }
+
 
   document.addEventListener("keydown", (event) => {
 
@@ -171,92 +171,14 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
   /* =====================================
-     9. RECRUITER FORM SUBMISSION
-     FORMSUBMIT EMAIL INTEGRATION
+     9. GOOGLE FORMS SUBMISSION
+     
+     Google Form handles submission directly
+     through the embedded iframe.
+     
+     No FormSubmit fetch request.
+     No duplicate HTML form submission.
   ===================================== */
-
-  if (form) {
-
-    form.addEventListener("submit", async (event) => {
-
-      event.preventDefault();
-
-      if (!submitBtn || !errorPanel) return;
-
-      errorPanel.hidden = true;
-      errorPanel.textContent = "";
-
-      submitBtn.disabled = true;
-      submitBtn.textContent = "Sending enquiry...";
-
-      try {
-
-        // Collect all form fields
-        const formData = new FormData(form);
-
-        const formValues = Object.fromEntries(
-          formData.entries()
-        );
-
-        // Send JSON to FormSubmit AJAX endpoint
-        const response = await fetch(
-          "https://formsubmit.co/ajax/siddiq.ibu11@gmail.com",
-          {
-            method: "POST",
-
-            headers: {
-              "Content-Type": "application/json",
-              "Accept": "application/json"
-            },
-
-            body: JSON.stringify(formValues)
-          }
-        );
-
-        // Read FormSubmit response
-        const result = await response.json();
-
-        console.log("FormSubmit response:", result);
-
-        // FormSubmit can return HTTP 200 even when submission fails.
-        if (
-          !response.ok ||
-          String(result.success).toLowerCase() !== "true"
-        ) {
-
-          throw new Error(
-            result.message || "Unable to send your enquiry."
-          );
-
-        }
-
-        // Successful submission
-        form.reset();
-
-        recruiterPanel.hidden = true;
-        successPanel.hidden = false;
-
-        submitBtn.disabled = false;
-        submitBtn.innerHTML = 'Send Enquiry <span>↗</span>';
-
-      } catch (error) {
-
-        console.error("Recruiter form error:", error);
-
-        // Show the actual error instead of a generic message
-        errorPanel.textContent =
-          error.message || "Something went wrong. Please try again.";
-
-        errorPanel.hidden = false;
-
-        submitBtn.disabled = false;
-        submitBtn.innerHTML = 'Send Enquiry <span>↗</span>';
-
-      }
-
-    });
-
-  }
 
 
   /* =====================================
@@ -297,6 +219,7 @@ document.addEventListener("DOMContentLoaded", () => {
           group.dataset.group === selected;
 
         group.classList.toggle("is-hidden", !matches);
+
         group.hidden = !matches;
 
       });
@@ -327,9 +250,11 @@ document.addEventListener("DOMContentLoaded", () => {
       if (!certLightbox || !certLightboxImg) return;
 
       certLightboxImg.src = img.src;
+
       certLightboxImg.alt = img.alt;
 
       certLightbox.hidden = false;
+
       document.body.classList.add("modal-open");
 
     });
@@ -358,6 +283,7 @@ document.addEventListener("DOMContentLoaded", () => {
   ===================================== */
 
   const tabLinks = document.querySelectorAll("[data-tab]");
+
   const panels = document.querySelectorAll("[data-panel]");
 
   const VALID_TABS = Array.from(panels).map(
@@ -366,6 +292,10 @@ document.addEventListener("DOMContentLoaded", () => {
 
   const DEFAULT_TAB = "about";
 
+
+  /* =====================================
+     13. ANIMATE STATS
+  ===================================== */
 
   function animateStats() {
 
@@ -380,8 +310,11 @@ document.addEventListener("DOMContentLoaded", () => {
       el.dataset.animated = "true";
 
       const target = parseInt(el.dataset.count, 10) || 0;
+
       const suffix = el.dataset.suffix || "";
+
       const duration = 900;
+
       const start = performance.now();
 
       function tick(now) {
@@ -392,6 +325,7 @@ document.addEventListener("DOMContentLoaded", () => {
         );
 
         const eased = 1 - Math.pow(1 - progress, 3);
+
         const value = Math.round(eased * target);
 
         el.textContent =
@@ -417,9 +351,14 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
 
+  /* =====================================
+     14. ROADMAP ANIMATION
+  ===================================== */
+
   function playRoadmapAnimation() {
 
     const roadmap = document.getElementById("roadmap");
+
     const progress = document.getElementById("roadmapProgress");
 
     if (!roadmap || !progress) return;
@@ -448,6 +387,10 @@ document.addEventListener("DOMContentLoaded", () => {
 
   }
 
+
+  /* =====================================
+     15. ACTIVATE TAB
+  ===================================== */
 
   function activateTab(name, updateHash) {
 
@@ -504,6 +447,10 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
 
+  /* =====================================
+     16. TAB CLICK EVENTS
+  ===================================== */
+
   tabLinks.forEach((link) => {
 
     link.addEventListener("click", (event) => {
@@ -517,6 +464,10 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 
 
+  /* =====================================
+     17. HASH CHANGE
+  ===================================== */
+
   window.addEventListener("hashchange", () => {
 
     const name = location.hash.replace("#", "");
@@ -525,6 +476,10 @@ document.addEventListener("DOMContentLoaded", () => {
 
   });
 
+
+  /* =====================================
+     18. INITIAL TAB
+  ===================================== */
 
   const initialTab = location.hash
     ? location.hash.replace("#", "")
@@ -536,7 +491,9 @@ document.addEventListener("DOMContentLoaded", () => {
     initialTab === DEFAULT_TAB ||
     !VALID_TABS.includes(initialTab)
   ) {
+
     animateStats();
+
   }
 
 });
